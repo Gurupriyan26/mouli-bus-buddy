@@ -135,10 +135,11 @@ export default function FinalTicketView({
                   </div>
                 </div>
 
-                <div className="border-t border-gray-200 pt-3 flex flex-wrap items-center justify-between text-xs text-gray-700">
+                <div className="border-t border-gray-200 pt-3 flex flex-wrap items-center justify-between text-xs text-gray-700 gap-2">
                   <span><strong>Travel Date:</strong> {booking.travelDate}</span>
                   <span><strong>Bus:</strong> {booking.bus.name} ({booking.bus.busNumber})</span>
                   <span><strong>Class:</strong> {booking.bus.type}</span>
+                  <span className="text-[#dd1818] font-bold"><strong>Registered Mobile:</strong> +91 9344187782</span>
                 </div>
               </div>
 
