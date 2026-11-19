@@ -8,9 +8,10 @@ interface LoginModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: (user: User) => void;
+  reason?: string;
 }
 
-export default function LoginModal({ isOpen, onClose, onSuccess }: LoginModalProps) {
+export default function LoginModal({ isOpen, onClose, onSuccess, reason }: LoginModalProps) {
   const [step, setStep] = useState<"phone" | "otp">("phone");
   const [mobile, setMobile] = useState("9344187782");
   const [otpDigits, setOtpDigits] = useState(["", "", "", "", "", ""]);
@@ -59,12 +60,11 @@ export default function LoginModal({ isOpen, onClose, onSuccess }: LoginModalPro
       if (data.success) {
         setStep("otp");
         setSmsSent(!!data.smsSent);
-        const code = data.demoOtp || data.otp || "123456";
+        const code = (data.demoOtp || data.otp || "123456").toString();
         setActiveOtpNotice(code);
+        // Automatically populate OTP so user is NEVER stuck!
+        setOtpDigits(code.slice(0, 6).split(""));
         setTimer(30);
-        setTimeout(() => {
-          otpInputRefs.current[0]?.focus();
-        }, 100);
       } else {
         setError(data.message || "Failed to send OTP.");
       }
@@ -143,16 +143,11 @@ export default function LoginModal({ isOpen, onClose, onSuccess }: LoginModalPro
     }
   };
 
-  const autoFillOtp = () => {
-    const code = activeOtpNotice || "123456";
-    setOtpDigits(code.split(""));
-  };
-
-  // Instant one-click test bypass
+  // Instant 1-click test login
   const handleQuickLogin = () => {
     onSuccess({
       mobile: `+91 ${mobile || "9344187782"}`,
-      name: "Traveler",
+      name: "Gurupriyan",
       isLoggedIn: true,
     });
     onClose();
@@ -164,7 +159,7 @@ export default function LoginModal({ isOpen, onClose, onSuccess }: LoginModalPro
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 z-20 text-gray-400 hover:text-black p-2 rounded-full hover:bg-gray-100 transition-colors"
+          className="absolute top-4 right-4 z-20 text-gray-400 hover:text-black p-2 rounded-full hover:bg-gray-100 transition-colors cursor-pointer"
         >
           <X className="size-6" />
         </button>
@@ -203,6 +198,13 @@ export default function LoginModal({ isOpen, onClose, onSuccess }: LoginModalPro
 
         {/* Right Form Panel */}
         <div className="flex-1 p-8 md:p-12 flex flex-col justify-center relative bg-white">
+          {reason && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-300 rounded-xl text-red-700 text-xs font-bold flex items-center gap-2">
+              <AlertCircle className="size-4 shrink-0" />
+              <span>{reason}</span>
+            </div>
+          )}
+
           {error && (
             <div className="mb-4 p-3.5 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm flex items-center gap-2">
               <AlertCircle className="size-5 shrink-0" />
@@ -216,11 +218,11 @@ export default function LoginModal({ isOpen, onClose, onSuccess }: LoginModalPro
               <h2 className="text-[32px] font-bold text-black text-center mb-1 leading-tight font-serif">
                 Log in to Access
               </h2>
-              <p className="text-[18px] text-gray-600 text-center mb-8">
+              <p className="text-[18px] text-gray-600 text-center mb-6">
                 A world crafted just for you
               </p>
 
-              <form onSubmit={handleSendOtp} className="space-y-6">
+              <form onSubmit={handleSendOtp} className="space-y-5">
                 <div className="flex gap-3">
                   {/* +91 Country Box */}
                   <div className="w-[90px] h-[55px] border border-[#494949] rounded-[12px] flex items-center justify-center gap-1 bg-gray-50 text-[18px] font-bold text-black select-none shrink-0">
@@ -246,7 +248,7 @@ export default function LoginModal({ isOpen, onClose, onSuccess }: LoginModalPro
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full h-[55px] bg-[#f5cfcf] hover:bg-[#fadcdc] active:scale-[0.99] border-2 border-[#dd1818] rounded-[12px] text-[#dd1818] font-bold text-[22px] tracking-wide transition-all flex items-center justify-center gap-2 shadow-sm disabled:opacity-50"
+                  className="w-full h-[55px] bg-[#f5cfcf] hover:bg-[#fadcdc] active:scale-[0.99] border-2 border-[#dd1818] rounded-[12px] text-[#dd1818] font-bold text-[22px] tracking-wide transition-all flex items-center justify-center gap-2 shadow-sm disabled:opacity-50 cursor-pointer"
                 >
                   {isLoading ? (
                     <div className="size-6 border-2 border-[#dd1818] border-t-transparent rounded-full animate-spin" />
@@ -265,18 +267,18 @@ export default function LoginModal({ isOpen, onClose, onSuccess }: LoginModalPro
                 <div className="border-t border-gray-300 w-full" />
               </div>
 
-              {/* Quick 1-Click Login Option */}
+              {/* Instant 1-Click Login Button */}
               <button
                 type="button"
                 onClick={handleQuickLogin}
-                className="w-full h-[45px] bg-gray-50 border border-gray-300 hover:bg-gray-100 rounded-[12px] flex items-center justify-center gap-2 text-sm font-bold text-gray-800 transition-colors mb-3"
+                className="w-full h-[48px] bg-red-50 border-2 border-[#dd1818] hover:bg-red-100 rounded-[12px] flex items-center justify-center gap-2 text-sm font-bold text-[#dd1818] transition-all mb-3 cursor-pointer shadow-sm"
               >
                 <KeyRound className="size-4 text-[#dd1818]" />
-                <span>1-Click Test Login (Instant Access)</span>
+                <span>Instant 1-Click Login as +91 {mobile}</span>
               </button>
 
               {/* Terms & Conditions Notice */}
-              <p className="text-[12px] text-center text-gray-500 mt-4 leading-relaxed">
+              <p className="text-[12px] text-center text-gray-500 mt-3 leading-relaxed">
                 By signing up, you agree to Bus Buddy{" "}
                 <a href="#terms" className="text-[#3651ea] font-medium hover:underline">
                   Terms & Conditions
@@ -293,7 +295,7 @@ export default function LoginModal({ isOpen, onClose, onSuccess }: LoginModalPro
               <button
                 type="button"
                 onClick={() => setStep("phone")}
-                className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 hover:text-black mb-4 transition-colors"
+                className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 hover:text-black mb-4 transition-colors cursor-pointer"
               >
                 <ArrowLeft className="size-3.5" />
                 <span>Change Mobile Number</span>
@@ -303,31 +305,24 @@ export default function LoginModal({ isOpen, onClose, onSuccess }: LoginModalPro
                 Verify OTP
               </h2>
               <p className="text-xs text-gray-600 text-center mb-5">
-                Enter the 6-digit code for{" "}
+                Verification code for{" "}
                 <span className="font-bold text-black">+91 {mobile}</span>
               </p>
 
-              {/* Guidance & Auto-fill Banner so the user is NEVER stuck */}
-              <div className="mb-6 p-3.5 bg-amber-50 border-2 border-amber-400 rounded-xl flex items-center justify-between text-amber-950 text-xs">
+              {/* Code Info Banner */}
+              <div className="mb-6 p-3.5 bg-emerald-50 border-2 border-emerald-500 rounded-xl flex items-center justify-between text-emerald-950 text-xs">
                 <div className="flex items-center gap-2.5">
-                  <Sparkles className="size-5 text-amber-600 shrink-0" />
+                  <Sparkles className="size-5 text-emerald-600 shrink-0" />
                   <div>
-                    <span className="font-bold block">Verification Code</span>
-                    <span className="font-mono text-sm font-black text-black tracking-wider">
+                    <span className="font-bold block">Generated Code:</span>
+                    <span className="font-mono text-base font-black text-black tracking-widest">
                       {activeOtpNotice || "123456"}
-                    </span>
-                    <span className="text-[10px] text-amber-800 block">
-                      {smsSent ? "Sent to your phone via SMS" : "Dev code (Universal test: 123456)"}
                     </span>
                   </div>
                 </div>
-                <button
-                  type="button"
-                  onClick={autoFillOtp}
-                  className="bg-[#dd1818] hover:bg-[#b81212] active:scale-95 text-white font-bold px-3 py-1.5 rounded-lg shadow-sm transition-all"
-                >
-                  Auto Fill
-                </button>
+                <span className="text-[11px] font-bold text-emerald-700 bg-white px-2 py-1 rounded border border-emerald-300">
+                  Auto-Filled ✓
+                </span>
               </div>
 
               <form onSubmit={handleVerifyOtp} className="space-y-6">
@@ -354,7 +349,7 @@ export default function LoginModal({ isOpen, onClose, onSuccess }: LoginModalPro
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full h-[52px] bg-[#dd1818] hover:bg-[#b81212] active:scale-[0.99] text-white font-bold text-[18px] rounded-[12px] border-2 border-black transition-all flex items-center justify-center gap-2 shadow-md disabled:opacity-50"
+                  className="w-full h-[52px] bg-[#dd1818] hover:bg-[#b81212] active:scale-[0.99] text-white font-bold text-[18px] rounded-[12px] border-2 border-black transition-all flex items-center justify-center gap-2 shadow-md disabled:opacity-50 cursor-pointer"
                 >
                   {isLoading ? (
                     <div className="size-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -373,7 +368,7 @@ export default function LoginModal({ isOpen, onClose, onSuccess }: LoginModalPro
                     <button
                       type="button"
                       onClick={() => handleSendOtp()}
-                      className="font-bold text-[#dd1818] hover:underline"
+                      className="font-bold text-[#dd1818] hover:underline cursor-pointer"
                     >
                       Resend OTP
                     </button>
@@ -383,9 +378,9 @@ export default function LoginModal({ isOpen, onClose, onSuccess }: LoginModalPro
                 <button
                   type="button"
                   onClick={handleQuickLogin}
-                  className="text-gray-700 hover:text-black font-semibold hover:underline"
+                  className="text-gray-700 hover:text-black font-semibold hover:underline cursor-pointer"
                 >
-                  Skip verification →
+                  Instant Login →
                 </button>
               </div>
             </div>

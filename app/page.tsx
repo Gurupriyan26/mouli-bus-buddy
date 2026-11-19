@@ -11,11 +11,12 @@ import SeatPickerModal from "@/components/SeatPickerModal";
 import PaymentModal from "@/components/PaymentModal";
 import FinalTicketView from "@/components/FinalTicketView";
 import { Bus, User, Passenger, Booking } from "@/types";
-import { Star, Wifi, Navigation, BatteryCharging, ArrowRight, Filter, RefreshCw, ShieldCheck, Clock, SlidersHorizontal } from "lucide-react";
+import { Star, Wifi, Navigation, BatteryCharging, ArrowRight, RefreshCw, ShieldCheck } from "lucide-react";
 
 export default function Home() {
   const [user, setUser] = useState<User | null>(null);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const [loginReason, setLoginReason] = useState<string | undefined>(undefined);
   const [searchResults, setSearchResults] = useState<Bus[] | null>(null);
   const [isSearching, setIsSearching] = useState(false);
   const [filterType, setFilterType] = useState<"all" | "sleeper" | "seater" | "highRated">("all");
@@ -48,11 +49,18 @@ export default function Home() {
   const handleLoginSuccess = (loggedInUser: User) => {
     setUser(loggedInUser);
     localStorage.setItem("bus_buddy_user", JSON.stringify(loggedInUser));
+
+    // If user clicked "Select Seats" before logging in, automatically open seat picker now!
+    if (selectedBus) {
+      setIsSeatPickerOpen(true);
+    }
   };
 
   const handleLogout = () => {
     setUser(null);
     localStorage.removeItem("bus_buddy_user");
+    setIsSeatPickerOpen(false);
+    setIsPaymentOpen(false);
   };
 
   const handleSearch = async (from: string, to: string, date: string) => {
@@ -74,12 +82,26 @@ export default function Home() {
     }
   };
 
+  // ENFORCE MANDATORY LOGIN BEFORE BOOKING (Fixing "without login how could we book the bus")
   const handleSelectBus = (bus: Bus) => {
     setSelectedBus(bus);
+
+    if (!user || !user.isLoggedIn) {
+      setLoginReason("Please log in with your mobile number to select seats and book your bus ticket.");
+      setIsLoginOpen(true);
+      return;
+    }
+
     setIsSeatPickerOpen(true);
   };
 
   const handleProceedToPayment = (seats: string[], passList: Passenger[]) => {
+    if (!user || !user.isLoggedIn) {
+      setLoginReason("Please log in to proceed to payment.");
+      setIsLoginOpen(true);
+      return;
+    }
+
     setBookedSeats(seats);
     setPassengers(passList);
     setIsSeatPickerOpen(false);
@@ -100,7 +122,7 @@ export default function Home() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // Filtered & Sorted Search Results (RedBus/MMT Filter Engine)
+  // Filtered & Sorted Search Results
   const filteredBuses = useMemo(() => {
     if (!searchResults) return null;
     let list = [...searchResults];
@@ -130,7 +152,10 @@ export default function Home() {
       <main className="min-h-screen bg-white">
         <Navbar
           user={user}
-          onOpenLogin={() => setIsLoginOpen(true)}
+          onOpenLogin={() => {
+            setLoginReason(undefined);
+            setIsLoginOpen(true);
+          }}
           onLogout={handleLogout}
         />
         <FinalTicketView
@@ -147,14 +172,17 @@ export default function Home() {
       {/* Navigation Bar */}
       <Navbar
         user={user}
-        onOpenLogin={() => setIsLoginOpen(true)}
+        onOpenLogin={() => {
+          setLoginReason(undefined);
+          setIsLoginOpen(true);
+        }}
         onLogout={handleLogout}
       />
 
       {/* Hero Section with Search Box */}
       <HeroSearch onSearch={handleSearch} />
 
-      {/* RedBus / MakeMyTrip-Style Search Results & Filter Engine */}
+      {/* Search Results */}
       {searchResults && (
         <section id="search-results" className="py-12 bg-gray-50 border-t border-b border-gray-200">
           <div className="max-w-[1512px] mx-auto px-6">
@@ -169,30 +197,30 @@ export default function Home() {
                 </p>
               </div>
 
-              {/* RedBus-Grade Quick Filters & Sorting Controls */}
+              {/* Quick Filters & Sorting Controls */}
               <div className="flex flex-wrap items-center gap-3">
                 <div className="flex items-center gap-1.5 bg-white border border-gray-300 rounded-xl p-1 shadow-sm text-xs font-bold">
                   <button
                     onClick={() => setFilterType("all")}
-                    className={`px-3 py-1.5 rounded-lg transition-all ${filterType === "all" ? "bg-[#dd1818] text-white" : "text-gray-700 hover:text-black"}`}
+                    className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${filterType === "all" ? "bg-[#dd1818] text-white" : "text-gray-700 hover:text-black"}`}
                   >
                     All Buses
                   </button>
                   <button
                     onClick={() => setFilterType("sleeper")}
-                    className={`px-3 py-1.5 rounded-lg transition-all ${filterType === "sleeper" ? "bg-[#dd1818] text-white" : "text-gray-700 hover:text-black"}`}
+                    className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${filterType === "sleeper" ? "bg-[#dd1818] text-white" : "text-gray-700 hover:text-black"}`}
                   >
                     AC Sleeper
                   </button>
                   <button
                     onClick={() => setFilterType("seater")}
-                    className={`px-3 py-1.5 rounded-lg transition-all ${filterType === "seater" ? "bg-[#dd1818] text-white" : "text-gray-700 hover:text-black"}`}
+                    className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${filterType === "seater" ? "bg-[#dd1818] text-white" : "text-gray-700 hover:text-black"}`}
                   >
                     Seater / Semi
                   </button>
                   <button
                     onClick={() => setFilterType("highRated")}
-                    className={`px-3 py-1.5 rounded-lg transition-all ${filterType === "highRated" ? "bg-[#dd1818] text-white" : "text-gray-700 hover:text-black"}`}
+                    className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${filterType === "highRated" ? "bg-[#dd1818] text-white" : "text-gray-700 hover:text-black"}`}
                   >
                     ★ 4.5+ Rated
                   </button>
@@ -201,7 +229,7 @@ export default function Home() {
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value as any)}
-                  className="bg-white border border-gray-300 rounded-xl px-3 py-2 text-xs font-bold text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#dd1818] shadow-sm"
+                  className="bg-white border border-gray-300 rounded-xl px-3 py-2 text-xs font-bold text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#dd1818] shadow-sm cursor-pointer"
                 >
                   <option value="rating">Sort: Top Rated</option>
                   <option value="priceLow">Sort: Lowest Price</option>
@@ -210,7 +238,7 @@ export default function Home() {
 
                 <button
                   onClick={() => handleSearch(searchParams.from, searchParams.to, searchParams.date)}
-                  className="text-xs font-bold text-gray-600 hover:text-black flex items-center gap-1.5 bg-white border border-gray-300 rounded-xl px-3 py-2 shadow-sm"
+                  className="text-xs font-bold text-gray-600 hover:text-black flex items-center gap-1.5 bg-white border border-gray-300 rounded-xl px-3 py-2 shadow-sm cursor-pointer"
                 >
                   <RefreshCw className={`size-3.5 ${isSearching ? "animate-spin" : ""}`} />
                   <span>Refresh</span>
@@ -300,7 +328,7 @@ export default function Home() {
                   <p className="text-base font-bold text-gray-700 mb-2">No buses match the selected filter.</p>
                   <button
                     onClick={() => setFilterType("all")}
-                    className="text-xs font-bold text-[#dd1818] hover:underline"
+                    className="text-xs font-bold text-[#dd1818] hover:underline cursor-pointer"
                   >
                     Clear Filters
                   </button>
@@ -311,10 +339,10 @@ export default function Home() {
         </section>
       )}
 
-      {/* Top Search Routes (Exact Figma Section) */}
+      {/* Top Search Routes */}
       <TopRoutes onSelectBus={handleSelectBus} />
 
-      {/* Our Services (Exact Figma Section) */}
+      {/* Our Services */}
       <OurServices />
 
       {/* Footer */}
@@ -323,7 +351,11 @@ export default function Home() {
       {/* Login & OTP Modal */}
       <LoginModal
         isOpen={isLoginOpen}
-        onClose={() => setIsLoginOpen(false)}
+        reason={loginReason}
+        onClose={() => {
+          setIsLoginOpen(false);
+          setLoginReason(undefined);
+        }}
         onSuccess={handleLoginSuccess}
       />
 
