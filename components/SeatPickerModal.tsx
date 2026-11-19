@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { X, Check, AlertCircle, ArrowRight, UserCheck, Shield } from "lucide-react";
+import { X, Check, AlertCircle, ArrowRight, UserCheck, Shield, Sparkles } from "lucide-react";
 import { Bus, Passenger } from "@/types";
 
 interface SeatPickerModalProps {
@@ -19,17 +19,18 @@ export default function SeatPickerModal({
   onClose,
   onProceedToPayment,
 }: SeatPickerModalProps) {
-  const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
-  const [passengers, setPassengers] = useState<Passenger[]>([]);
-  const [currentDeck, setCurrentDeck] = useState<"lower" | "upper">("lower");
+  const [selectedSeats, setSelectedSeats] = useState<string[]>(["U1"]);
+  const [passengers, setPassengers] = useState<Passenger[]>([
+    { name: "Gurupriyan", age: 24, gender: "Male", seatNumber: "U1" },
+  ]);
+  const [currentDeck, setCurrentDeck] = useState<"lower" | "upper">("upper");
   const [error, setError] = useState<string | null>(null);
 
   if (!isOpen || !bus) return null;
 
-  // Seat matrix data
-  // Lower deck seats: L1 to L18
-  // Upper deck sleeper berths: U1 to U18
+  // Booked and Ladies reserved seats
   const bookedSeats = ["L2", "L5", "L9", "L14", "U3", "U7", "U12", "U15"];
+  const ladiesSeats = ["L1", "L4", "U2", "U5"];
 
   const lowerDeckRows = [
     { row: 1, left: ["L1", "L2"], right: ["L3"] },
@@ -69,7 +70,7 @@ export default function SeatPickerModal({
         {
           name: "",
           age: "",
-          gender: "Male",
+          gender: ladiesSeats.includes(seatNo) ? "Female" : "Male",
           seatNumber: seatNo,
         },
       ]);
@@ -83,6 +84,17 @@ export default function SeatPickerModal({
   ) => {
     setPassengers((prev) =>
       prev.map((p) => (p.seatNumber === seatNo ? { ...p, [field]: value } : p))
+    );
+  };
+
+  const handleAutoFillMyInfo = () => {
+    setPassengers((prev) =>
+      prev.map((p, idx) => ({
+        ...p,
+        name: idx === 0 ? "Gurupriyan" : `Passenger ${idx + 1}`,
+        age: idx === 0 ? 24 : 22,
+        gender: p.gender || "Male",
+      }))
     );
   };
 
@@ -114,7 +126,7 @@ export default function SeatPickerModal({
   const totalFare = baseFare + gst;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm overflow-y-auto animate-fade-in">
       <div className="relative w-full max-w-[1100px] bg-white rounded-[24px] border border-black shadow-2xl overflow-hidden my-8">
         {/* Modal Header */}
         <div className="bg-[#dd1818] text-white p-6 flex items-center justify-between">
@@ -131,7 +143,7 @@ export default function SeatPickerModal({
           </div>
           <button
             onClick={onClose}
-            className="text-white/80 hover:text-white p-2 rounded-full hover:bg-white/10 transition-colors"
+            className="text-white/80 hover:text-white p-2 rounded-full hover:bg-white/10 transition-colors cursor-pointer"
           >
             <X className="size-6" />
           </button>
@@ -145,14 +157,14 @@ export default function SeatPickerModal({
         )}
 
         <div className="p-6 grid grid-cols-1 lg:grid-cols-12 gap-8">
-          {/* Left Column: Interactive Bus Seat Layout (7 cols) */}
+          {/* Left Column: RedBus / MakeMyTrip-Style Bus Seat Layout */}
           <div className="lg:col-span-7 flex flex-col items-center">
             {/* Deck Selector Tabs */}
             <div className="flex items-center gap-3 mb-6 bg-gray-100 p-1.5 rounded-xl border border-gray-200">
               <button
                 type="button"
                 onClick={() => setCurrentDeck("lower")}
-                className={`px-6 py-2 rounded-lg text-sm font-bold transition-all ${
+                className={`px-6 py-2 rounded-lg text-sm font-bold transition-all cursor-pointer ${
                   currentDeck === "lower"
                     ? "bg-[#dd1818] text-white shadow-sm"
                     : "text-gray-600 hover:text-black"
@@ -163,7 +175,7 @@ export default function SeatPickerModal({
               <button
                 type="button"
                 onClick={() => setCurrentDeck("upper")}
-                className={`px-6 py-2 rounded-lg text-sm font-bold transition-all ${
+                className={`px-6 py-2 rounded-lg text-sm font-bold transition-all cursor-pointer ${
                   currentDeck === "upper"
                     ? "bg-[#dd1818] text-white shadow-sm"
                     : "text-gray-600 hover:text-black"
@@ -174,34 +186,40 @@ export default function SeatPickerModal({
             </div>
 
             {/* Seat Map Legend */}
-            <div className="flex items-center gap-6 mb-6 text-xs text-gray-700">
-              <div className="flex items-center gap-2">
-                <div className="size-5 rounded border-2 border-gray-400 bg-white" />
+            <div className="flex flex-wrap items-center justify-center gap-4 mb-6 text-xs text-gray-700">
+              <div className="flex items-center gap-1.5">
+                <div className="size-4 rounded border-2 border-gray-400 bg-white" />
                 <span>Available</span>
               </div>
-              <div className="flex items-center gap-2">
-                <div className="size-5 rounded bg-gray-300 border border-gray-400" />
+              <div className="flex items-center gap-1.5">
+                <div className="size-4 rounded bg-gray-300 border border-gray-400" />
                 <span>Booked</span>
               </div>
-              <div className="flex items-center gap-2">
-                <div className="size-5 rounded bg-[#dd1818] text-white flex items-center justify-center font-bold text-[10px]">
+              <div className="flex items-center gap-1.5">
+                <div className="size-4 rounded border-2 border-pink-500 bg-pink-50" />
+                <span className="text-pink-700 font-semibold">Ladies</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <div className="size-4 rounded bg-[#dd1818] text-white flex items-center justify-center font-bold text-[9px]">
                   ✓
                 </div>
-                <span>Selected</span>
+                <span className="font-bold text-[#dd1818]">Selected</span>
               </div>
             </div>
 
-            {/* Bus Body Layout Container */}
-            <div className="w-full max-w-[380px] bg-gray-50 border-2 border-gray-800 rounded-3xl p-6 relative shadow-inner">
-              {/* Driver Steering wheel indicator */}
-              <div className="flex justify-between items-center pb-4 mb-4 border-b-2 border-dashed border-gray-300 text-xs font-bold text-gray-500 uppercase tracking-widest">
-                <span>Front</span>
-                <span className="flex items-center gap-1">
-                  🛞 Driver Side
+            {/* Bus Cabin Frame */}
+            <div className="w-full max-w-[400px] bg-gray-50 border-2 border-gray-800 rounded-3xl p-6 relative shadow-inner">
+              {/* Front Cabin Windshield & Steering */}
+              <div className="flex justify-between items-center pb-3 mb-4 border-b-2 border-dashed border-gray-300 text-xs font-bold text-gray-500 uppercase tracking-widest">
+                <span className="flex items-center gap-1 text-[11px] font-semibold text-gray-600">
+                  🚪 Door Side
+                </span>
+                <span className="flex items-center gap-1 text-[11px] font-semibold text-gray-800 bg-gray-200 px-2 py-0.5 rounded">
+                  🛞 Driver Cabin
                 </span>
               </div>
 
-              {/* Rows layout */}
+              {/* Rows */}
               <div className="space-y-4">
                 {(currentDeck === "lower" ? lowerDeckRows : upperDeckRows).map(
                   (rowItem) => (
@@ -214,54 +232,67 @@ export default function SeatPickerModal({
                         {rowItem.left.map((seatNo) => {
                           const isBooked = bookedSeats.includes(seatNo);
                           const isSelected = selectedSeats.includes(seatNo);
+                          const isLadies = ladiesSeats.includes(seatNo);
                           return (
                             <button
                               key={seatNo}
                               type="button"
                               disabled={isBooked}
                               onClick={() => toggleSeat(seatNo)}
-                              className={`w-12 h-14 rounded-lg flex flex-col items-center justify-center font-bold text-xs transition-all border-2 ${
+                              title={isBooked ? "Seat already booked" : isLadies ? "Ladies reserved seat" : "Available seat"}
+                              className={`w-13 h-14 rounded-xl flex flex-col items-center justify-center font-bold text-xs transition-all border-2 cursor-pointer relative ${
                                 isSelected
                                   ? "bg-[#dd1818] text-white border-black scale-105 shadow-md"
                                   : isBooked
                                   ? "bg-gray-300 text-gray-500 border-gray-400 cursor-not-allowed"
+                                  : isLadies
+                                  ? "bg-pink-50 text-pink-900 border-pink-400 hover:border-pink-600 hover:shadow"
                                   : "bg-white text-gray-900 border-gray-400 hover:border-[#dd1818] hover:shadow"
                               }`}
                             >
                               <span>{seatNo}</span>
                               <span className="text-[9px] font-normal opacity-80">
-                                {currentDeck === "upper" ? "Sleep" : "Seat"}
+                                {currentDeck === "upper" ? "Berth" : "Seat"}
                               </span>
+                              {isLadies && !isSelected && !isBooked && (
+                                <span className="absolute -top-1 -right-1 size-2 rounded-full bg-pink-500" />
+                              )}
                             </button>
                           );
                         })}
                       </div>
 
                       {/* Walkway Aisle */}
-                      <div className="w-6 border-r border-dashed border-gray-300 h-14" />
+                      <div className="w-8 flex flex-col items-center justify-center text-[10px] text-gray-300 font-mono select-none">
+                        |
+                      </div>
 
                       {/* Right 1 seat */}
                       <div className="flex gap-2">
                         {rowItem.right.map((seatNo) => {
                           const isBooked = bookedSeats.includes(seatNo);
                           const isSelected = selectedSeats.includes(seatNo);
+                          const isLadies = ladiesSeats.includes(seatNo);
                           return (
                             <button
                               key={seatNo}
                               type="button"
                               disabled={isBooked}
                               onClick={() => toggleSeat(seatNo)}
-                              className={`w-14 h-14 rounded-lg flex flex-col items-center justify-center font-bold text-xs transition-all border-2 ${
+                              title={isBooked ? "Seat already booked" : "Available seat"}
+                              className={`w-14 h-14 rounded-xl flex flex-col items-center justify-center font-bold text-xs transition-all border-2 cursor-pointer relative ${
                                 isSelected
                                   ? "bg-[#dd1818] text-white border-black scale-105 shadow-md"
                                   : isBooked
                                   ? "bg-gray-300 text-gray-500 border-gray-400 cursor-not-allowed"
+                                  : isLadies
+                                  ? "bg-pink-50 text-pink-900 border-pink-400 hover:border-pink-600 hover:shadow"
                                   : "bg-white text-gray-900 border-gray-400 hover:border-[#dd1818] hover:shadow"
                               }`}
                             >
                               <span>{seatNo}</span>
                               <span className="text-[9px] font-normal opacity-80">
-                                {currentDeck === "upper" ? "Sleep" : "Seat"}
+                                {currentDeck === "upper" ? "Berth" : "Seat"}
                               </span>
                             </button>
                           );
@@ -274,13 +305,26 @@ export default function SeatPickerModal({
             </div>
           </div>
 
-          {/* Right Column: Passenger Info & Fare Breakdown (5 cols) */}
+          {/* Right Column: Passenger Info & Fare Breakdown */}
           <div className="lg:col-span-5 flex flex-col justify-between space-y-6">
             <div>
-              <h3 className="text-lg font-bold text-black mb-3 font-serif flex items-center gap-2">
-                <UserCheck className="size-5 text-[#dd1818]" />
-                <span>Passenger Details</span>
-              </h3>
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-lg font-bold text-black font-serif flex items-center gap-2">
+                  <UserCheck className="size-5 text-[#dd1818]" />
+                  <span>Passenger Details</span>
+                </h3>
+
+                {selectedSeats.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={handleAutoFillMyInfo}
+                    className="text-xs font-bold text-[#dd1818] hover:underline flex items-center gap-1"
+                  >
+                    <Sparkles className="size-3" />
+                    <span>Auto-Fill Info</span>
+                  </button>
+                )}
+              </div>
 
               {selectedSeats.length === 0 ? (
                 <div className="p-8 border-2 border-dashed border-gray-200 rounded-2xl text-center text-gray-500 text-sm">
@@ -303,12 +347,12 @@ export default function SeatPickerModal({
                       <div className="space-y-2">
                         <input
                           type="text"
-                          placeholder="Full Name"
+                          placeholder="Full Name (as per Govt ID)"
                           value={p.name}
                           onChange={(e) =>
                             handlePassengerChange(p.seatNumber, "name", e.target.value)
                           }
-                          className="w-full h-10 px-3 border border-gray-300 rounded-lg text-sm font-medium focus:ring-2 focus:ring-[#dd1818] focus:outline-none"
+                          className="w-full h-10 px-3 border border-gray-300 rounded-lg text-sm font-medium focus:ring-2 focus:ring-[#dd1818] focus:outline-none bg-white"
                         />
                         <div className="flex gap-2">
                           <input
@@ -318,7 +362,7 @@ export default function SeatPickerModal({
                             onChange={(e) =>
                               handlePassengerChange(p.seatNumber, "age", e.target.value)
                             }
-                            className="w-24 h-10 px-3 border border-gray-300 rounded-lg text-sm font-medium focus:ring-2 focus:ring-[#dd1818] focus:outline-none"
+                            className="w-24 h-10 px-3 border border-gray-300 rounded-lg text-sm font-medium focus:ring-2 focus:ring-[#dd1818] focus:outline-none bg-white"
                           />
                           <select
                             value={p.gender}
@@ -339,7 +383,7 @@ export default function SeatPickerModal({
               )}
             </div>
 
-            {/* Fare Breakdown Card - Matching Figma Fare Details */}
+            {/* Fare Breakdown Card */}
             <div className="bg-gray-50 border border-gray-200 rounded-2xl p-5 space-y-3">
               <h4 className="text-sm font-bold text-gray-700 uppercase tracking-wider">
                 Fare Breakdown
@@ -372,7 +416,7 @@ export default function SeatPickerModal({
               <button
                 type="button"
                 onClick={handleContinue}
-                className="w-full h-12 bg-[#dd1818] hover:bg-[#b81212] active:scale-[0.99] text-white font-bold text-base rounded-xl transition-all shadow-md flex items-center justify-center gap-2 mt-4"
+                className="w-full h-12 bg-[#dd1818] hover:bg-[#b81212] active:scale-[0.99] text-white font-bold text-base rounded-xl transition-all shadow-md flex items-center justify-center gap-2 mt-4 cursor-pointer"
               >
                 <span>Proceed to Payment</span>
                 <ArrowRight className="size-4" />

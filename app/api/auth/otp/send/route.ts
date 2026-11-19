@@ -93,7 +93,7 @@ export async function POST(request: Request) {
     const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
     const expiresAt = Date.now() + 5 * 60 * 1000; // 5 mins validity
 
-    // Store securely in server-side session
+    // Store in server-side session
     global.otpStore.set(last10Digits, { otp: generatedOtp, expiresAt });
 
     const fast2smsApiKey = process.env.FAST2SMS_API_KEY;
@@ -103,35 +103,32 @@ export async function POST(request: Request) {
 
     let smsDispatched = false;
 
-    // 1. Try Fast2SMS Gateway if API key provided
     if (fast2smsApiKey) {
       smsDispatched = await sendFast2SMS(fast2smsApiKey, last10Digits, generatedOtp);
-    }
-    // 2. Try Twilio if credentials provided
-    else if (twilioSid && twilioToken && twilioFrom) {
+    } else if (twilioSid && twilioToken && twilioFrom) {
       smsDispatched = await sendTwilioSMS(twilioSid, twilioToken, twilioFrom, last10Digits, generatedOtp);
-    } else {
-      console.warn("\n=======================================================");
-      console.warn(`[SMS GATEWAY ALERT] No SMS_API_KEY configured in .env.local.`);
-      console.warn(`OTP for +91 ${last10Digits} is: ${generatedOtp}`);
-      console.warn(`Add FAST2SMS_API_KEY in .env.local to send physical cellular SMS.`);
-      console.warn("=======================================================\n");
     }
+
+    console.log(`\n=======================================================`);
+    console.log(`[BUS BUDDY AUTH] OTP for +91 ${last10Digits}: ${generatedOtp}`);
+    console.log(`Real SMS Dispatched: ${smsDispatched ? "YES (Carrier Sent)" : "NO (API Key not set in .env.local)"}`);
+    console.log(`=======================================================\n`);
 
     return NextResponse.json({
       success: true,
       message: smsDispatched
-        ? `OTP has been dispatched via SMS to +91 ${last10Digits}`
+        ? `SMS sent successfully to +91 ${last10Digits}`
         : `OTP generated for +91 ${last10Digits}`,
       mobile: last10Digits,
       smsSent: smsDispatched,
+      // Pass OTP for seamless dev/testing so user is NEVER stuck when SMS key is not yet configured
+      demoOtp: smsDispatched ? null : generatedOtp,
       expiresInSeconds: 300,
-      // In development fallback if no key is set yet, also log in terminal
     });
   } catch (error) {
     console.error("OTP send error:", error);
     return NextResponse.json(
-      { success: false, message: "Failed to send OTP SMS. Please try again." },
+      { success: false, message: "Failed to process OTP request. Please try again." },
       { status: 500 }
     );
   }
