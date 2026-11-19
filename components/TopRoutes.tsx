@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Star, Wifi, Navigation, Coffee, BatteryCharging, ArrowRight } from "lucide-react";
+import { Star, Wifi, Navigation, BatteryCharging, ArrowRight } from "lucide-react";
 import { Bus } from "@/types";
 
 interface TopRoutesProps {
@@ -61,21 +61,24 @@ const FEATURED_ROUTES: Bus[] = [
 
 export default function TopRoutes({ onSelectBus }: TopRoutesProps) {
   return (
-    <section id="routes" className="w-full py-16 bg-white">
-      <div className="max-w-[1512px] mx-auto px-6">
+    <section id="routes" className="w-full py-12 md:py-16 bg-white">
+      <div className="max-w-[1340px] mx-auto px-4 sm:px-6">
         {/* Section Heading - Exact Figma 1:13317 */}
-        <div className="text-center mb-12">
-          <h2 className="text-[42px] md:text-[50px] font-bold text-black font-serif">
+        <div className="text-center mb-8 md:mb-12">
+          <h2 className="text-3xl sm:text-4xl md:text-[46px] font-bold text-black font-serif">
             Top Search <span className="text-[#dd1818]">Routes</span>
           </h2>
+          <p className="text-sm text-gray-500 mt-2 font-sans">
+            Most popular daily bus services booked by our travelers
+          </p>
         </div>
 
-        {/* 3 Top Search Cards - Exact Figma Dimensions (460x242) and Layout */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 justify-items-center">
+        {/* 3 Top Search Cards - Exact Figma Dimensions & Layout */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 justify-items-center">
           {FEATURED_ROUTES.map((route) => (
             <div
               key={route.id}
-              className="w-full max-w-[460px] h-[255px] border border-[#867f7f] rounded-[16px] p-5 flex flex-col justify-between hover:shadow-xl transition-all duration-300 bg-white relative group"
+              className="w-full max-w-[420px] lg:max-w-[460px] min-h-[255px] border border-[#867f7f] rounded-[20px] p-5 sm:p-6 flex flex-col justify-between hover:shadow-xl transition-all duration-300 bg-white relative group"
             >
               {/* Header: From / To with Direction */}
               <div>
@@ -85,7 +88,7 @@ export default function TopRoutes({ onSelectBus }: TopRoutesProps) {
                 </div>
 
                 <div className="flex items-center justify-between mb-3">
-                  <span className="text-[22px] font-bold text-black font-serif">
+                  <span className="text-xl sm:text-[22px] font-bold text-black font-serif">
                     {route.from}
                   </span>
 
@@ -95,19 +98,19 @@ export default function TopRoutes({ onSelectBus }: TopRoutesProps) {
                       {route.duration}
                     </span>
                     <div className="flex items-center gap-1">
-                      <div className="w-10 h-0.5 bg-gray-300" />
+                      <div className="w-8 sm:w-10 h-0.5 bg-gray-300" />
                       <div className="size-2 rounded-full bg-[#dd1818]" />
-                      <div className="w-10 h-0.5 bg-gray-300" />
+                      <div className="w-8 sm:w-10 h-0.5 bg-gray-300" />
                     </div>
                   </div>
 
-                  <span className="text-[22px] font-bold text-black font-serif">
+                  <span className="text-xl sm:text-[22px] font-bold text-black font-serif">
                     {route.to}
                   </span>
                 </div>
 
                 {/* Departure / Arrival Times */}
-                <div className="flex items-center justify-between text-sm font-semibold text-gray-800 mb-2">
+                <div className="flex items-center justify-between text-sm font-semibold text-gray-800 mb-2 font-mono">
                   <span>{route.departureTime}</span>
                   <span>{route.arrivalTime}</span>
                 </div>
@@ -146,15 +149,15 @@ export default function TopRoutes({ onSelectBus }: TopRoutesProps) {
               </div>
 
               {/* Bottom: Price & Select Seats Button - Figma 1:186 */}
-              <div className="flex items-center justify-between border-t border-gray-100 pt-3 mt-1">
-                <div className="text-[24px] font-bold text-black font-mono">
+              <div className="flex items-center justify-between border-t border-gray-100 pt-4 mt-2">
+                <div className="text-2xl sm:text-[26px] font-black text-black font-mono">
                   ₹ {route.price}
                 </div>
 
                 <button
                   type="button"
                   onClick={() => onSelectBus(route)}
-                  className="bg-[#dd1818] hover:bg-[#b81212] active:scale-95 text-white border-2 border-black rounded-[12px] px-6 py-2 font-bold text-sm transition-all shadow-sm flex items-center gap-1.5"
+                  className="bg-[#dd1818] hover:bg-[#b81212] active:scale-95 text-white border-2 border-black rounded-[12px] px-5 py-2 font-bold text-sm transition-all shadow-sm flex items-center gap-1.5 cursor-pointer"
                 >
                   <span>Select Seats</span>
                   <ArrowRight className="size-4" />

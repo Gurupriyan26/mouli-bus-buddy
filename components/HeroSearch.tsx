@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { MapPin, Calendar, ArrowRightLeft, Search, Sparkles } from "lucide-react";
+import { MapPin, Calendar, ArrowRightLeft, Search } from "lucide-react";
 
 interface HeroSearchProps {
   onSearch: (from: string, to: string, date: string) => void;
@@ -33,6 +33,7 @@ export default function HeroSearch({ onSearch }: HeroSearchProps) {
 
   const fromRef = useRef<HTMLDivElement>(null);
   const toRef = useRef<HTMLDivElement>(null);
+  const dateInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -66,30 +67,44 @@ export default function HeroSearch({ onSearch }: HeroSearchProps) {
     onSearch(from, to, date);
   };
 
+  // Format date display nicely (e.g., "Nov 21, 2026")
+  const formattedDate = (() => {
+    try {
+      const parts = date.split("-");
+      if (parts.length === 3) {
+        const d = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+        return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+      }
+      return date;
+    } catch {
+      return date;
+    }
+  })();
+
   return (
-    <section id="hero" className="relative w-full pt-10 pb-16 overflow-visible bg-gradient-to-b from-red-50/50 via-white to-white">
-      <div className="max-w-[1512px] mx-auto px-6 flex flex-col items-center">
+    <section id="hero" className="relative w-full pt-8 pb-12 sm:pb-16 bg-gradient-to-b from-red-50/40 via-white to-white overflow-hidden">
+      <div className="max-w-[1340px] mx-auto px-4 sm:px-6 flex flex-col items-center">
         {/* Subtitle - Exact Figma font & style */}
-        <p className="text-[26px] md:text-[32px] font-normal text-black/70 mb-2 font-sans tracking-wide">
+        <p className="text-lg sm:text-xl md:text-2xl font-normal text-black/70 mb-2 font-sans tracking-wide text-center">
           Get your bus tickets
         </p>
 
-        {/* Main Title - Exact Figma font (Aclonica) & style */}
-        <h1 className="text-[40px] md:text-[72px] lg:text-[85px] font-bold text-black text-center mb-10 tracking-tight leading-none font-serif">
+        {/* Main Title - Responsive & centered */}
+        <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-[68px] font-bold text-black text-center mb-8 md:mb-10 tracking-tight leading-tight font-serif px-2">
           Find Best Bus For You !
         </h1>
 
-        {/* Bus Search Box Card - Matching Figma exact Dimensions & Shadow */}
-        <div className="w-full max-w-[1327px] bg-white border border-[#a39f9f] rounded-[28px] shadow-[10px_15px_5px_0px_#a39f9f] p-6 lg:p-8 relative z-20">
-          <form onSubmit={handleSubmit} className="flex flex-col lg:flex-row items-center gap-4 lg:gap-5 justify-between">
-            {/* Starting Point - With RedBus/MMT Autocomplete Dropdown */}
-            <div ref={fromRef} className="relative w-full lg:w-[345px]">
+        {/* Bus Search Box Card - Fully Responsive with Figma Exact Styling & Shadow */}
+        <div className="w-full max-w-[1240px] bg-white border border-[#a39f9f] rounded-[24px] md:rounded-[28px] shadow-[6px_10px_0px_0px_#a39f9f] md:shadow-[10px_15px_5px_0px_#a39f9f] p-4 sm:p-6 lg:p-7 relative z-20">
+          <form onSubmit={handleSubmit} className="flex flex-col lg:flex-row items-center gap-3 lg:gap-3 w-full">
+            {/* Starting Point */}
+            <div ref={fromRef} className="relative w-full lg:flex-[1.2] min-w-0">
               <div
                 onClick={() => setShowFromSuggestions(true)}
-                className="w-full h-[60px] border border-black rounded-[12px] flex items-center px-4 bg-white transition-all focus-within:ring-2 focus-within:ring-[#dd1818] cursor-text"
+                className="w-full h-[62px] border border-black rounded-[12px] flex items-center px-4 bg-white transition-all focus-within:ring-2 focus-within:ring-[#dd1818] cursor-text"
               >
-                <div className="flex-1">
-                  <label className="text-[11px] font-bold text-gray-500 uppercase tracking-wider block">
+                <div className="flex-1 min-w-0">
+                  <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider block">
                     Starting Point
                   </label>
                   <input
@@ -101,16 +116,16 @@ export default function HeroSearch({ onSearch }: HeroSearchProps) {
                       setShowFromSuggestions(true);
                     }}
                     placeholder="e.g. Chennai"
-                    className="w-full text-[19px] font-bold text-black focus:outline-none placeholder:text-[#a39f9f] bg-transparent"
+                    className="w-full text-base sm:text-[18px] font-bold text-black focus:outline-none placeholder:text-[#a39f9f] bg-transparent truncate"
                   />
                 </div>
-                <MapPin className="size-6 text-[#dd1818] shrink-0" />
+                <MapPin className="size-5 text-[#dd1818] shrink-0 ml-2" />
               </div>
 
               {/* City Suggestions Menu */}
               {showFromSuggestions && (
-                <div className="absolute top-[68px] left-0 w-full bg-white border border-gray-300 rounded-2xl shadow-2xl z-50 overflow-hidden max-h-[280px] overflow-y-auto animate-fade-in">
-                  <div className="p-2.5 bg-gray-50 border-b border-gray-100 text-[11px] font-bold text-gray-500 uppercase tracking-wider">
+                <div className="absolute top-[68px] left-0 w-full bg-white border border-gray-300 rounded-2xl shadow-2xl z-50 overflow-hidden max-h-[260px] overflow-y-auto animate-fade-in">
+                  <div className="p-2.5 bg-gray-50 border-b border-gray-100 text-[10px] font-bold text-gray-500 uppercase tracking-wider">
                     Popular Boarding Cities
                   </div>
                   {POPULAR_CITIES.filter((c) =>
@@ -122,13 +137,13 @@ export default function HeroSearch({ onSearch }: HeroSearchProps) {
                         setFrom(city.name);
                         setShowFromSuggestions(false);
                       }}
-                      className="px-4 py-2.5 hover:bg-red-50 hover:text-[#dd1818] cursor-pointer transition-colors border-b border-gray-50 flex items-center justify-between"
+                      className="px-4 py-2 hover:bg-red-50 hover:text-[#dd1818] cursor-pointer transition-colors border-b border-gray-50 flex items-center justify-between"
                     >
                       <div>
                         <span className="font-bold text-sm text-black block">{city.name}</span>
                         <span className="text-[11px] text-gray-500">{city.desc}</span>
                       </div>
-                      <span className="text-xs text-gray-400">Select</span>
+                      <span className="text-[11px] text-gray-400">Select</span>
                     </div>
                   ))}
                 </div>
@@ -140,19 +155,19 @@ export default function HeroSearch({ onSearch }: HeroSearchProps) {
               type="button"
               onClick={handleSwap}
               title="Swap From and To locations"
-              className="size-11 rounded-full bg-[#dd1818] text-white flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-md shrink-0 cursor-pointer"
+              className="size-10 lg:size-11 rounded-full bg-[#dd1818] text-white flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-md shrink-0 cursor-pointer my-1 lg:my-0"
             >
-              <ArrowRightLeft className="size-5" />
+              <ArrowRightLeft className="size-4 lg:size-5" />
             </button>
 
-            {/* Destination Point - With RedBus/MMT Autocomplete Dropdown */}
-            <div ref={toRef} className="relative w-full lg:w-[345px]">
+            {/* Destination Point */}
+            <div ref={toRef} className="relative w-full lg:flex-[1.2] min-w-0">
               <div
                 onClick={() => setShowToSuggestions(true)}
-                className="w-full h-[60px] border border-black rounded-[12px] flex items-center px-4 bg-white transition-all focus-within:ring-2 focus-within:ring-[#dd1818] cursor-text"
+                className="w-full h-[62px] border border-black rounded-[12px] flex items-center px-4 bg-white transition-all focus-within:ring-2 focus-within:ring-[#dd1818] cursor-text"
               >
-                <div className="flex-1">
-                  <label className="text-[11px] font-bold text-gray-500 uppercase tracking-wider block">
+                <div className="flex-1 min-w-0">
+                  <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider block">
                     Destination Point
                   </label>
                   <input
@@ -164,16 +179,16 @@ export default function HeroSearch({ onSearch }: HeroSearchProps) {
                       setShowToSuggestions(true);
                     }}
                     placeholder="e.g. Bangalore"
-                    className="w-full text-[19px] font-bold text-black focus:outline-none placeholder:text-[#a39f9f] bg-transparent"
+                    className="w-full text-base sm:text-[18px] font-bold text-black focus:outline-none placeholder:text-[#a39f9f] bg-transparent truncate"
                   />
                 </div>
-                <MapPin className="size-6 text-[#dd1818] shrink-0" />
+                <MapPin className="size-5 text-[#dd1818] shrink-0 ml-2" />
               </div>
 
               {/* City Suggestions Menu */}
               {showToSuggestions && (
-                <div className="absolute top-[68px] left-0 w-full bg-white border border-gray-300 rounded-2xl shadow-2xl z-50 overflow-hidden max-h-[280px] overflow-y-auto animate-fade-in">
-                  <div className="p-2.5 bg-gray-50 border-b border-gray-100 text-[11px] font-bold text-gray-500 uppercase tracking-wider">
+                <div className="absolute top-[68px] left-0 w-full bg-white border border-gray-300 rounded-2xl shadow-2xl z-50 overflow-hidden max-h-[260px] overflow-y-auto animate-fade-in">
+                  <div className="p-2.5 bg-gray-50 border-b border-gray-100 text-[10px] font-bold text-gray-500 uppercase tracking-wider">
                     Popular Destination Cities
                   </div>
                   {POPULAR_CITIES.filter((c) =>
@@ -185,61 +200,81 @@ export default function HeroSearch({ onSearch }: HeroSearchProps) {
                         setTo(city.name);
                         setShowToSuggestions(false);
                       }}
-                      className="px-4 py-2.5 hover:bg-red-50 hover:text-[#dd1818] cursor-pointer transition-colors border-b border-gray-50 flex items-center justify-between"
+                      className="px-4 py-2 hover:bg-red-50 hover:text-[#dd1818] cursor-pointer transition-colors border-b border-gray-50 flex items-center justify-between"
                     >
                       <div>
                         <span className="font-bold text-sm text-black block">{city.name}</span>
                         <span className="text-[11px] text-gray-500">{city.desc}</span>
                       </div>
-                      <span className="text-xs text-gray-400">Select</span>
+                      <span className="text-[11px] text-gray-400">Select</span>
                     </div>
                   ))}
                 </div>
               )}
             </div>
 
-            {/* Travel Date with Quick Shortcuts (Today / Tomorrow) */}
-            <div className="relative w-full lg:w-[325px]">
-              <div className="w-full h-[60px] border border-black rounded-[12px] flex items-center px-4 bg-white transition-all focus-within:ring-2 focus-within:ring-[#dd1818]">
-                <div className="flex-1">
-                  <div className="flex items-center justify-between pr-2">
-                    <label className="text-[11px] font-bold text-gray-500 uppercase tracking-wider block">
+            {/* Travel Date - Clean, single calendar icon, no duplicate native icon */}
+            <div className="relative w-full lg:flex-[1.1] min-w-0">
+              <div
+                onClick={() => {
+                  try {
+                    dateInputRef.current?.showPicker();
+                  } catch {
+                    dateInputRef.current?.focus();
+                  }
+                }}
+                className="w-full h-[62px] border border-black rounded-[12px] flex items-center px-4 bg-white transition-all focus-within:ring-2 focus-within:ring-[#dd1818] cursor-pointer relative"
+              >
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between pr-1">
+                    <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider block">
                       Travel Date
                     </label>
-                    <div className="flex items-center gap-1.5">
+                    <div className="flex items-center gap-1">
                       <button
                         type="button"
-                        onClick={() => setDateOffset(0)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setDateOffset(0);
+                        }}
                         className="text-[10px] font-bold bg-gray-100 hover:bg-red-50 hover:text-[#dd1818] px-1.5 py-0.5 rounded transition-colors"
                       >
                         Today
                       </button>
                       <button
                         type="button"
-                        onClick={() => setDateOffset(1)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setDateOffset(1);
+                        }}
                         className="text-[10px] font-bold bg-gray-100 hover:bg-red-50 hover:text-[#dd1818] px-1.5 py-0.5 rounded transition-colors"
                       >
                         Tomorrow
                       </button>
                     </div>
                   </div>
+                  <div className="text-base sm:text-[18px] font-bold text-black truncate select-none">
+                    {formattedDate}
+                  </div>
+                  {/* Real date input underneath - completely invisible duplicate indicator */}
                   <input
+                    ref={dateInputRef}
                     type="date"
                     value={date}
                     onChange={(e) => setDate(e.target.value)}
-                    className="w-full text-[17px] font-bold text-black focus:outline-none bg-transparent"
+                    className="opacity-0 absolute inset-0 w-full h-full cursor-pointer z-10"
                   />
                 </div>
-                <Calendar className="size-6 text-gray-700 shrink-0 pointer-events-none" />
+                <Calendar className="size-5 text-gray-700 shrink-0 ml-2 pointer-events-none" />
               </div>
             </div>
 
             {/* Search Button */}
             <button
               type="submit"
-              className="w-full lg:w-[170px] h-[60px] bg-[#dd1818] hover:bg-[#b81212] active:scale-95 border-2 border-black rounded-[12px] text-white font-bold text-[24px] flex items-center justify-center gap-3 transition-all shadow-md shrink-0 cursor-pointer"
+              className="w-full lg:w-[150px] xl:w-[165px] h-[62px] bg-[#dd1818] hover:bg-[#b81212] active:scale-95 border-2 border-black rounded-[12px] text-white font-bold text-lg sm:text-[22px] flex items-center justify-center gap-2.5 transition-all shadow-md shrink-0 cursor-pointer"
             >
-              <Search className="size-6" />
+              <Search className="size-5" />
               <span>Search</span>
             </button>
           </form>
