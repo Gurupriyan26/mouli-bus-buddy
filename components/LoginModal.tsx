@@ -177,27 +177,16 @@ export default function LoginModal({ isOpen, onClose, onSuccess }: LoginModalPro
 
         {/* Right Form Panel - Matching Figma Login / OTP Flow */}
         <div className="flex-1 p-8 md:p-12 flex flex-col justify-center relative bg-white">
-          {/* Real OTP Banner notification so user NEVER gets stuck */}
-          {activeOtpNotice && (
-            <div className="mb-6 p-4 bg-red-50 border-2 border-[#dd1818] rounded-xl flex items-center justify-between animate-pulse">
-              <div className="flex items-center gap-3">
-                <Sparkles className="size-6 text-[#dd1818]" />
-                <div>
-                  <span className="text-xs font-bold uppercase tracking-wider text-red-600 block">
-                    Verification Code Generated
-                  </span>
-                  <span className="text-2xl font-black text-black tracking-widest font-mono">
-                    {activeOtpNotice}
-                  </span>
-                </div>
+          {/* Security SMS Sent Confirmation */}
+          {step === "otp" && (
+            <div className="mb-6 p-4 bg-emerald-50 border border-emerald-300 rounded-xl flex items-center gap-3 text-emerald-900 text-sm">
+              <ShieldCheck className="size-5 text-emerald-600 shrink-0" />
+              <div>
+                <span className="font-bold block">SMS Dispatched to Your Mobile</span>
+                <span className="text-xs text-emerald-800">
+                  A 6-digit OTP has been sent via SMS gateway to <strong>+91 {mobile}</strong>.
+                </span>
               </div>
-              <button
-                type="button"
-                onClick={autoFillOtp}
-                className="bg-[#dd1818] text-white text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-red-700 active:scale-95 transition-all"
-              >
-                Auto Fill
-              </button>
             </div>
           )}
 
