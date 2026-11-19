@@ -1,0 +1,48 @@
+import type { Metadata } from "next";
+import { Albert_Sans, Red_Hat_Display, Aclonica, Alata } from "next/font/google";
+import "./globals.css";
+
+const albert = Albert_Sans({
+  subsets: ["latin"],
+  variable: "--font-albert",
+  display: "swap",
+});
+
+const redHat = Red_Hat_Display({
+  subsets: ["latin"],
+  variable: "--font-redhat",
+  display: "swap",
+});
+
+const aclonica = Aclonica({
+  weight: "400",
+  subsets: ["latin"],
+  variable: "--font-aclonica",
+  display: "swap",
+});
+
+const alata = Alata({
+  weight: "400",
+  subsets: ["latin"],
+  variable: "--font-alata",
+  display: "swap",
+});
+
+export const metadata: Metadata = {
+  title: "Bus Buddy - Find Best Bus For You | Thangavelu",
+  description: "Book bus tickets online with Bus Buddy. Secure payment, instant OTP, live seat selection, and instant boarding pass.",
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html lang="en" className={`${albert.variable} ${redHat.variable} ${aclonica.variable} ${alata.variable}`}>
+      <body className="antialiased min-h-screen bg-white">
+        {children}
+      </body>
+    </html>
+  );
+}
