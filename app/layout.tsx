@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Albert_Sans, Red_Hat_Display, Aclonica, Alata } from "next/font/google";
+import PwaRegister from "@/components/PwaRegister";
 import "./globals.css";
 
 const albert = Albert_Sans({
@@ -45,8 +46,13 @@ export const metadata: Metadata = {
     title: "Bus Buddy",
   },
   icons: {
-    icon: "/icons/icon-192.svg",
-    apple: "/icons/icon-192.svg",
+    icon: [
+      { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icons/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [
+      { url: "/icons/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+    ],
   },
 };
 
@@ -57,7 +63,16 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${albert.variable} ${redHat.variable} ${aclonica.variable} ${alata.variable}`}>
+      <head>
+        <link rel="manifest" href="/manifest.json" />
+        <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png" />
+        <link rel="icon" type="image/png" sizes="512x512" href="/icons/icon-512.png" />
+        <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+        <meta name="theme-color" content="#dd1818" />
+        <meta name="mobile-web-app-capable" content="yes" />
+      </head>
       <body className="antialiased min-h-screen bg-white text-black overflow-x-hidden">
+        <PwaRegister />
         {children}
       </body>
     </html>

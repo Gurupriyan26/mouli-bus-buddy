@@ -1,24 +1,48 @@
 {
+  "id": "/",
   "name": "Bus Buddy - Thangavelu Travels",
   "short_name": "Bus Buddy",
-  "description": "Book bus tickets online with live seat selection, instant OTP verification, and digital boarding pass.",
+  "description": "Book bus tickets online with Bus Buddy. Live seat selection, instant OTP verification, and digital boarding pass.",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#dd1818",
   "orientation": "portrait-primary",
   "icons": [
     {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
       "src": "/icons/icon-192.svg",
       "sizes": "192x192",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
+      "type": "image/svg+xml"
     },
     {
       "src": "/icons/icon-512.svg",
       "sizes": "512x512",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
+      "type": "image/svg+xml"
     }
   ],
   "categories": ["travel", "transportation", "lifestyle"],
