@@ -23,6 +23,9 @@ export interface Bus {
   duration: string;
   price: number;
   rating: number;
+  bookedCount?: number; // e.g. 1420
+  isRecommended?: boolean;
+  popularityBadge?: string; // e.g. "Most Booked", "Top Rated"
   amenities: {
     wifi: boolean;
     charging: boolean;
@@ -59,7 +62,7 @@ export interface Booking {
   baseFare: number;
   gst: number;
   totalFare: number;
-  paymentMethod: "UPI" | "Card" | "NetBanking" | "Wallet" | "PayLater" | "EMI";
+  paymentMethod: string;
   status: "CONFIRMED" | "PENDING" | "CANCELLED";
   createdAt: string;
 }

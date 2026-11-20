@@ -12,7 +12,7 @@ import PaymentModal from "@/components/PaymentModal";
 import FinalTicketView from "@/components/FinalTicketView";
 import InstallPwaModal from "@/components/InstallPwaModal";
 import { Bus, User, Passenger, Booking } from "@/types";
-import { Star, Wifi, Navigation, BatteryCharging, ArrowRight, RefreshCw, ShieldCheck } from "lucide-react";
+import { Star, Wifi, Navigation, BatteryCharging, ArrowRight, RefreshCw, ShieldCheck, Flame } from "lucide-react";
 
 export default function Home() {
   const [user, setUser] = useState<User | null>(null);
@@ -22,7 +22,7 @@ export default function Home() {
   const [searchResults, setSearchResults] = useState<Bus[] | null>(null);
   const [isSearching, setIsSearching] = useState(false);
   const [filterType, setFilterType] = useState<"all" | "sleeper" | "seater" | "highRated">("all");
-  const [sortBy, setSortBy] = useState<"rating" | "priceLow" | "departure">("rating");
+  const [sortBy, setSortBy] = useState<"recommended" | "rating" | "priceLow" | "departure">("recommended");
 
   const [searchParams, setSearchParams] = useState({
     from: "Chennai",
@@ -124,7 +124,7 @@ export default function Home() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // Filtered & Sorted Search Results
+  // Filtered & Sorted Search Results - Most Booked (Recommended) First
   const filteredBuses = useMemo(() => {
     if (!searchResults) return null;
     let list = [...searchResults];
@@ -137,7 +137,9 @@ export default function Home() {
       list = list.filter((b) => b.rating >= 4.5);
     }
 
-    if (sortBy === "rating") {
+    if (sortBy === "recommended") {
+      list.sort((a, b) => (b.bookedCount || 0) - (a.bookedCount || 0));
+    } else if (sortBy === "rating") {
       list.sort((a, b) => b.rating - a.rating);
     } else if (sortBy === "priceLow") {
       list.sort((a, b) => a.price - b.price);
@@ -196,6 +198,10 @@ export default function Home() {
           <div className="max-w-[1340px] mx-auto px-4 sm:px-6">
             <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 gap-4">
               <div>
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-red-50 text-[#dd1818] border border-red-200 rounded-full text-xs font-bold mb-2">
+                  <Flame className="size-3.5 fill-[#dd1818]" />
+                  <span>Showing Top Recommended & Most Booked Buses First</span>
+                </div>
                 <h2 className="text-2xl sm:text-3xl font-bold font-serif text-black">
                   Available Buses ({filteredBuses?.length || 0})
                 </h2>
@@ -239,9 +245,10 @@ export default function Home() {
                   onChange={(e) => setSortBy(e.target.value as any)}
                   className="bg-white border border-gray-300 rounded-xl px-2.5 sm:px-3 py-1.5 sm:py-2 text-xs font-bold text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#dd1818] shadow-sm cursor-pointer"
                 >
-                  <option value="rating">Sort: Top Rated</option>
-                  <option value="priceLow">Sort: Lowest Price</option>
-                  <option value="departure">Sort: Departure</option>
+                  <option value="recommended">🔥 Sort: Most Booked (Recommended)</option>
+                  <option value="rating">★ Sort: Top Rated</option>
+                  <option value="priceLow">₹ Sort: Lowest Price</option>
+                  <option value="departure">🕒 Sort: Departure Time</option>
                 </select>
 
                 <button
@@ -257,13 +264,45 @@ export default function Home() {
             {/* Bus Cards List */}
             <div className="space-y-4 sm:space-y-5">
               {filteredBuses && filteredBuses.length > 0 ? (
-                filteredBuses.map((bus) => (
+                filteredBuses.map((bus, idx) => (
                   <div
                     key={bus.id}
-                    className="bg-white border border-gray-300 rounded-2xl p-5 sm:p-6 hover:shadow-xl transition-all flex flex-col lg:flex-row items-center justify-between gap-6 relative group"
+                    className={`bg-white rounded-2xl p-5 sm:p-6 hover:shadow-xl transition-all flex flex-col lg:flex-row items-center justify-between gap-6 relative group ${
+                      idx === 0 && sortBy === "recommended"
+                        ? "border-2 border-[#dd1818] shadow-md ring-1 ring-red-100"
+                        : "border border-gray-300"
+                    }`}
                   >
                     {/* Bus Operator & Features */}
                     <div className="space-y-2 flex-1 w-full lg:w-auto">
+                      {/* Popularity Badge & Booking Stats */}
+                      <div className="flex flex-wrap items-center gap-2 mb-1">
+                        {bus.popularityBadge && (
+                          <span
+                            className={`text-[11px] font-black px-2.5 py-0.5 rounded-full flex items-center gap-1 ${
+                              idx === 0
+                                ? "bg-red-50 text-[#dd1818] border border-red-300"
+                                : "bg-amber-50 text-amber-900 border border-amber-300"
+                            }`}
+                          >
+                            <Flame className="size-3 fill-current" />
+                            <span>{bus.popularityBadge}</span>
+                          </span>
+                        )}
+
+                        {bus.bookedCount && (
+                          <span className="text-[11px] font-bold text-gray-600 bg-gray-100 px-2 py-0.5 rounded-full">
+                            {bus.bookedCount.toLocaleString()}+ travelers booked
+                          </span>
+                        )}
+
+                        {bus.availableSeatsCount <= 8 && (
+                          <span className="text-[11px] font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded-full border border-red-200 animate-pulse">
+                            Fast Filling!
+                          </span>
+                        )}
+                      </div>
+
                       <div className="flex flex-wrap items-center gap-2 sm:gap-3">
                         <h3 className="text-lg sm:text-xl font-bold text-black font-serif">{bus.name}</h3>
                         <div className="bg-[#007d13] text-white px-2 py-0.5 rounded text-xs font-extrabold flex items-center gap-1">
